@@ -30,7 +30,7 @@ public class WebServer {
     System.out.println("(press ctrl-c to exit)");
     try {
       // create the main server socket
-      s = new ServerSocket(3000);
+      s = new ServerSocket(80);
     } catch (Exception e) {
       System.out.println("Error: " + e);
       return;
@@ -55,6 +55,11 @@ public class WebServer {
         while (str != null && !str.equals(""))
           str = in.readLine();
 
+        System.out.println(str);
+//        if(str.startsWith("GET ")){
+//          String url = str.substring(4);
+//          out.println();
+//        }
         // Send the response
         // Send the headers
         out.println("HTTP/1.0 200 OK");
@@ -64,6 +69,7 @@ public class WebServer {
         out.println("");
         // Send the HTML page
         out.println("<H1>Welcome to the Ultra Mini-WebServer</H2>");
+
         out.flush();
         remote.close();
       } catch (Exception e) {
