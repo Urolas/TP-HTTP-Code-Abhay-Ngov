@@ -8,6 +8,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
  * Java Copyright 2001 by Jeff Heaton
@@ -52,23 +56,44 @@ public class WebServer {
         // blank line signals the end of the client HTTP
         // headers.
         String str = ".";
-        while (str != null && !str.equals(""))
+        String request = "";
+        while (str != null && !str.equals("")){
           str = in.readLine();
+          request+=str+'\n';
+        }
 
-        System.out.println(str);
-//        if(str.startsWith("GET ")){
-//          String url = str.substring(4);
-//          out.println();
-//        }
-        // Send the response
-        // Send the headers
-        out.println("HTTP/1.0 200 OK");
-        out.println("Content-Type: text/html");
-        out.println("Server: Bot");
-        // this blank line signals the end of the headers
-        out.println("");
-        // Send the HTML page
-        out.println("<H1>Welcome to the Ultra Mini-WebServer</H2>");
+        if(request.startsWith("GET ")){
+          //remove the '/' and get the url
+          String url = request.split(" ",3)[1].substring(1);
+          if (!url.equals("favicon.ico")){
+            Path fileName = Path.of(url);
+            String actual = Files.readString(fileName);
+            out.println();
+            // Send the response
+            // Send the headers
+            out.println("HTTP/1.0 200 OK");
+            out.println("Content-Type: text/html");
+            out.println("Server: Bot");
+            // this blank line signals the end of the headers
+            out.println("");
+            // Send the HTML page
+            out.println(actual);
+          }
+        }else if(request.startsWith("POST ")){
+
+          String content = "";
+          String strParser = ".";
+          while(strParser != null && !strParser.equals("")){
+            strParser = in.readLine();
+            content+=strParser+'\n';
+          }
+          System.out.println(content);
+          String url = request.split(" ",3)[1].substring(1);
+
+        }else{
+          out.println("HTTP/1.0 400");
+          out.println("");
+        }
 
         out.flush();
         remote.close();
@@ -77,6 +102,7 @@ public class WebServer {
       }
     }
   }
+
 
   /**
    * Start the application.
