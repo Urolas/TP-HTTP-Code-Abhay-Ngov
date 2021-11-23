@@ -2,13 +2,10 @@
 
 package http.server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -91,10 +88,10 @@ public class WebServer {
           System.out.println(content);
           String url = request.split(" ", 3)[1].substring(1);
 
-        }else if(request.startsWith("HEAD ")){
+        }else if(request.startsWith("HEAD ")) {
 
           //remove the '/' and get the url
-          String url = request.split(" ",3)[1].substring(1);
+          String url = request.split(" ", 3)[1].substring(1);
           if (!url.equals("favicon.ico")) {
             out.println();
             // Send the response
@@ -106,7 +103,50 @@ public class WebServer {
 
           }
 
-      
+        }else if(request.startsWith("PUT ")) {
+
+
+        }else if(request.startsWith("DELETE ")){ //200(OK) includes message body ,202(ACCEPTED) not yet performed, 204(NO CONTENT) completed but no body
+
+          //remove the '/' and get the url
+          String url = request.split(" ", 3)[1].substring(1);
+          Path fileName = Path.of(url);
+          if (!url.equals("favicon.ico")) {
+            out.println();
+            // Send the response
+
+            try {
+              File fileToDelete = new File(String.valueOf(fileName));
+
+              // Delete file
+              boolean deleteSuccess = false;
+              boolean fileExist = false;
+
+              if((fileExist = fileToDelete.exists())) {
+                deleteSuccess = fileToDelete.delete();
+              }
+
+              // Send the headers
+              if(deleteSuccess) {
+                out.write("HTTP/1.0 204 NO CONTENT");
+              } else if (!fileExist) {
+                out.write("HTTP/1.0 404 FILE NOT FOUND");
+              } else {
+                out.write("HTTP/1.0 403 FORBIDDEN");
+              }
+              out.flush();
+
+            } catch (Exception e) {
+              System.out.println(e);
+            }
+
+            // Send the rest of the headers
+            out.println("Content-Type: text/html");
+            out.println("Server: Bot");
+            out.println("");
+
+          }
+
 
         }else{
           out.println("HTTP/1.0 400");
