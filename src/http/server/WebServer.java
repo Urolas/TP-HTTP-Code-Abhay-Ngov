@@ -129,6 +129,8 @@ public class WebServer {
               // Send the headers
               if(deleteSuccess) {
                 out.write("HTTP/1.0 204 NO CONTENT");
+                out.println("Content-Type: text/html");
+                out.println("Server: Bot");
               } else if (!fileExist) {
                 out.write("HTTP/1.0 404 FILE NOT FOUND");
               } else {
@@ -141,8 +143,6 @@ public class WebServer {
             }
 
             // Send the rest of the headers
-            out.println("Content-Type: text/html");
-            out.println("Server: Bot");
             out.println("");
 
           }
