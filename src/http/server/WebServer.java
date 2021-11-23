@@ -78,17 +78,35 @@ public class WebServer {
             out.println("");
             // Send the HTML page
             out.println(actual);
+            System.out.println(actual);
           }
-        }else if(request.startsWith("POST ")){
+        }else if(request.startsWith("POST ")) {
 
           String content = "";
           String strParser = ".";
-          while(strParser != null && !strParser.equals("")){
+          while (strParser != null && !strParser.equals("")) {
             strParser = in.readLine();
-            content+=strParser+'\n';
+            content += strParser + '\n';
           }
           System.out.println(content);
+          String url = request.split(" ", 3)[1].substring(1);
+
+        }else if(request.startsWith("HEAD ")){
+
+          //remove the '/' and get the url
           String url = request.split(" ",3)[1].substring(1);
+          if (!url.equals("favicon.ico")) {
+            out.println();
+            // Send the response
+            // Send the headers
+            out.println("HTTP/1.0 200 OK");
+            out.println("Content-Type: text/html");
+            out.println("Server: Bot");
+            out.println("");
+
+          }
+
+      
 
         }else{
           out.println("HTTP/1.0 400");
