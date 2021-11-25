@@ -24,20 +24,20 @@ public class WebServer {
    */
   public static void main(String args[]) {
     WebServer ws = new WebServer();
-    ws.start();
+    ws.start(Integer.parseInt(args[0]));
   }
 
   /**
    * starts the web server
    */
-  protected void start() {
+  protected void start(int port) {
     ServerSocket s;
 
     System.out.println("Webserver starting up on port 80");
     System.out.println("(press ctrl-c to exit)");
     try {
       // create the main server socket
-      s = new ServerSocket(80);
+      s = new ServerSocket(port);
     } catch (Exception e) {
       System.out.println("Error: " + e);
       return;
@@ -109,7 +109,11 @@ public class WebServer {
           writer.append(String.valueOf(data)+"\n");
 
           writer.close();
-          out.println("HTTP/1.0 200 OK");
+          if(dataFile.exists()){
+            out.println("HTTP/1.0 200 OK");
+          }else{
+            out.println("HTTP/1.0 201 FILE CREATED");
+          }
           out.println("Server: Bot");
           out.println("Content-Type: text/html");
           out.println("");
@@ -132,6 +136,44 @@ public class WebServer {
           }
           //------------------------------------------REQUEST PUT---------------------------------------------
         } else if (request.startsWith("PUT ")) { //200 Status ok or 204 Status No content , 201 Created
+
+          char[] data = new char[lengthContent];
+          in.read(data,0,lengthContent);
+          System.out.println(data);
+          String path = "dataPUT.txt";
+          File dataFile = new File(path);
+
+          try{
+
+            if(dataFile.exists()) {
+              //clear the old file
+              FileWriter fw = new FileWriter(dataFile, false);
+              PrintWriter pw = new PrintWriter(fw, false);
+              pw.flush();
+              pw.close();
+              fw.close();
+            }
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(dataFile, true));
+            writer.append(String.valueOf(data) + "\n");
+
+            writer.close();
+
+            if(dataFile.exists()){
+              out.println("HTTP/1.0 200 OK");
+            }else{
+              out.println("HTTP/1.0 201 FILE CREATED");
+            }
+            out.println("Server: Bot");
+            out.println("Content-Type: text/html");
+            out.println("");
+            out.println("<H3>Suscribed !</H3>");
+
+          }catch(Exception exception){
+            System.out.println(exception);
+            out.println("HTTP/1.0 500 INTERNAL SERVER ERROR");
+            out.println("");
+          }
 
 
           //------------------------------------------REQUEST DELETE---------------------------------------------
