@@ -61,10 +61,16 @@ public class WebServer {
         // headers.
         String str = ".";
         String request = "";
+        int lengthContent = 0;
         while (str != null && !str.equals("")) {
           str = in.readLine();
           request += str + '\n';
+          System.out.println(str);
+          if (str.contains("Content-Length")){
+            lengthContent = Integer.parseInt(str.split(" ",2)[1]);
+          }
         }
+
         //------------------------------------------REQUEST GET---------------------------------------------
         if (request.startsWith("GET ")) {
           //remove the '/' and get the url
@@ -94,8 +100,7 @@ public class WebServer {
 
           //------------------------------------------REQUEST POST---------------------------------------------
         } else if (request.startsWith("POST ")) { // Status 200 = ok ; Status 201 = Created
-          int index = request.indexOf("Content-Length")+"Content-Length".length();
-          int lengthContent = Integer.parseInt(request.substring(index+2,index+4));
+
           char[] data = new char[lengthContent];
           in.read(data,0,lengthContent);
           System.out.println(data);
@@ -110,7 +115,6 @@ public class WebServer {
           out.println("");
           out.println("<H3>Suscribed !</H3>");
 
-
           //------------------------------------------REQUEST HEAD---------------------------------------------
         } else if (request.startsWith("HEAD ")) {
 
@@ -121,7 +125,7 @@ public class WebServer {
             // Send the response
             // Send the headers
             out.println("HTTP/1.0 200 OK");
-            out.println("Content-Type: text/html");
+            addContentType(url, out);
             out.println("Server: Bot");
             out.println("");
 
