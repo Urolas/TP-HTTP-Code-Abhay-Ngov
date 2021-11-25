@@ -146,6 +146,7 @@ public class WebServer {
               // Delete file
               boolean deleteSuccess = false;
               boolean fileExist = false;
+              //String fileTxt = Files.readString(fileName);
 
               if ((fileExist = fileToDelete.exists())) {
                 deleteSuccess = fileToDelete.delete();
@@ -156,12 +157,16 @@ public class WebServer {
                 out.println("HTTP/1.0 204 NO CONTENT"); // didn't read the file, I just deleted it
                 addContentType(url, out);
                 out.println("Server: Bot");
+                out.println("");
+                //out.println(fileTxt);
+
               } else if (!fileExist) {
+
                 out.println("HTTP/1.0 404 FILE NOT FOUND");
               } else {
                 out.println("HTTP/1.0 401 UNAUTHORIZED");
+
               }
-              out.flush();
 
             } catch (Exception e) {
               System.out.println(e);
@@ -170,6 +175,7 @@ public class WebServer {
             }
             // Send the rest of the headers
             out.println("");
+
           }
         } else {
           out.println("HTTP/1.0 400 BAD REQUEST");
