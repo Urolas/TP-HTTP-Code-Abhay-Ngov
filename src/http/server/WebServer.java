@@ -80,14 +80,13 @@ public class WebServer {
         }else if(request.startsWith("POST ")) {
 
           String content = "";
-          String strParser = ".";
-          while (strParser != null && !strParser.equals("")) {
-            strParser = in.readLine();
-            content += strParser + '\n';
+          char str2 = '.';
+          while((int)str2 != (int)'}'){
+            str2 = (char)in.read();
+            content+=str2;
           }
           System.out.println(content);
-          String url = request.split(" ", 3)[1].substring(1);
-
+          
         }else if(request.startsWith("HEAD ")) {
 
           //remove the '/' and get the url
@@ -146,6 +145,9 @@ public class WebServer {
             out.println("");
 
           }
+
+
+
 
 
         }else{
