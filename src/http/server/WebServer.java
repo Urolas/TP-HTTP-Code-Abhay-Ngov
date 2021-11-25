@@ -120,6 +120,7 @@ public class WebServer {
               // Delete file
               boolean deleteSuccess = false;
               boolean fileExist = false;
+              //String fileTxt = Files.readString(fileName);
 
               if((fileExist = fileToDelete.exists())) {
                 deleteSuccess = fileToDelete.delete();
@@ -130,19 +131,21 @@ public class WebServer {
                 out.write("HTTP/1.0 204 NO CONTENT");
                 out.println("Content-Type: text/html");
                 out.println("Server: Bot");
+                out.println("");
+                //out.println(fileTxt);
+
               } else if (!fileExist) {
                 out.write("HTTP/1.0 404 FILE NOT FOUND");
+                out.println("");
               } else {
                 out.write("HTTP/1.0 403 FORBIDDEN");
+                out.println("");
               }
-              out.flush();
 
             } catch (Exception e) {
               System.out.println(e);
             }
 
-            // Send the rest of the headers
-            out.println("");
 
           }
 
