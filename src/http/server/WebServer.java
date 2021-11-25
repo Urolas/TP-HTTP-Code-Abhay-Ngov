@@ -1,28 +1,34 @@
-///A Simple Web Server (WebServer.java)
+/**
+ * WebServer.java
+ * @author Annie Abhay and Sophanna Ngov
+ * */
 
 package http.server;
-
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
- * Java Copyright 2001 by Jeff Heaton
- * 
- * WebServer is a very simple web-server. Any request is responded with a very
- * simple web-page.
- * 
- * @author Jeff Heaton
- * @version 1.0
+ * Launch a web server
  */
 public class WebServer {
 
+
+
   /**
-   * WebServer constructor.
+   * main of WebServer.java
+   * @param args includes ip address and port
+   */
+  public static void main(String args[]) {
+    WebServer ws = new WebServer();
+    ws.start();
+  }
+
+  /**
+   * starts the web server
    */
   protected void start() {
     ServerSocket s;
@@ -38,15 +44,16 @@ public class WebServer {
     }
 
     System.out.println("Waiting for connection");
-    for (;;) {
+    for (; ; ) {
+      PrintWriter out = null;
       try {
         // wait for a connection
         Socket remote = s.accept();
         // remote is now the connected socket
         System.out.println("Connection, sending data.");
         BufferedReader in = new BufferedReader(new InputStreamReader(
-            remote.getInputStream()));
-        PrintWriter out = new PrintWriter(remote.getOutputStream());
+                remote.getInputStream()));
+        out = new PrintWriter(remote.getOutputStream());
 
         // read the data sent. We basically ignore it,
         // stop reading once a blank line is hit. This
@@ -54,40 +61,58 @@ public class WebServer {
         // headers.
         String str = ".";
         String request = "";
-        while (str != null && !str.equals("")){
+        while (str != null && !str.equals("")) {
           str = in.readLine();
-          request+=str+'\n';
+          request += str + '\n';
         }
-
-        if(request.startsWith("GET ")){
+        //------------------------------------------REQUEST GET---------------------------------------------
+        if (request.startsWith("GET ")) {
           //remove the '/' and get the url
-          String url = request.split(" ",3)[1].substring(1);
-          if (!url.equals("favicon.ico")){
-            Path fileName = Path.of(url);
-            String actual = Files.readString(fileName);
-            out.println();
-            // Send the response
-            // Send the headers
+          String url = request.split(" ", 3)[1].substring(1);
+          File file = new File(url);
+          out.println();
+          // Send the response
+          if (!file.exists()) {
+            out.println("HTTP/1.0 404 FILE NOT FOUND");
+            out.println("");
+          } else {
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(remote.getOutputStream());
             out.println("HTTP/1.0 200 OK");
-            out.println("Content-Type: text/html");
             out.println("Server: Bot");
+            //we ignore the icon request
+            if (url.equals("favicon.ico")) {
+              continue;
+            }
+            addContentType(url, out);
             // this blank line signals the end of the headers
             out.println("");
+            out.flush();
             // Send the HTML page
-            out.println(actual);
-            System.out.println(actual);
+            Files.copy(file.toPath(), bufferedOutputStream);
+            bufferedOutputStream.close();
           }
-        }else if(request.startsWith("POST ")) {
 
-          String content = "";
-          char str2 = '.';
-          while((int)str2 != (int)'}'){
-            str2 = (char)in.read();
-            content+=str2;
-          }
-          System.out.println(content);
-          
-        }else if(request.startsWith("HEAD ")) {
+          //------------------------------------------REQUEST POST---------------------------------------------
+        } else if (request.startsWith("POST ")) { // Status 200 = ok ; Status 201 = Created
+          int index = request.indexOf("Content-Length")+"Content-Length".length();
+          int lengthContent = Integer.parseInt(request.substring(index+2,index+4));
+          char[] data = new char[lengthContent];
+          in.read(data,0,lengthContent);
+          System.out.println(data);
+          File dataFile = new File("data.txt");
+          BufferedWriter writer = new BufferedWriter(new FileWriter(dataFile, true));
+          writer.append(String.valueOf(data)+"\n");
+
+          writer.close();
+          out.println("HTTP/1.0 200 OK");
+          out.println("Server: Bot");
+          out.println("Content-Type: text/html");
+          out.println("");
+          out.println("<H3>Suscribed !</H3>");
+
+
+          //------------------------------------------REQUEST HEAD---------------------------------------------
+        } else if (request.startsWith("HEAD ")) {
 
           //remove the '/' and get the url
           String url = request.split(" ", 3)[1].substring(1);
@@ -101,11 +126,12 @@ public class WebServer {
             out.println("");
 
           }
+          //------------------------------------------REQUEST PUT---------------------------------------------
+        } else if (request.startsWith("PUT ")) { //200 Status ok or 204 Status No content , 201 Created
 
-        }else if(request.startsWith("PUT ")) {
 
-
-        }else if(request.startsWith("DELETE ")){ //200(OK) includes message body ,202(ACCEPTED) not yet performed, 204(NO CONTENT) completed but no body
+          //------------------------------------------REQUEST DELETE---------------------------------------------
+        } else if (request.startsWith("DELETE ")) { //200(OK) includes message body or 204(NO CONTENT) completed but no body
 
           //remove the '/' and get the url
           String url = request.split(" ", 3)[1].substring(1);
@@ -121,57 +147,64 @@ public class WebServer {
               boolean deleteSuccess = false;
               boolean fileExist = false;
 
-              if((fileExist = fileToDelete.exists())) {
+              if ((fileExist = fileToDelete.exists())) {
                 deleteSuccess = fileToDelete.delete();
               }
 
               // Send the headers
-              if(deleteSuccess) {
-                out.write("HTTP/1.0 204 NO CONTENT");
-                out.println("Content-Type: text/html");
+              if (deleteSuccess) {
+                out.println("HTTP/1.0 204 NO CONTENT"); // didn't read the file, I just deleted it
+                addContentType(url, out);
                 out.println("Server: Bot");
               } else if (!fileExist) {
-                out.write("HTTP/1.0 404 FILE NOT FOUND");
+                out.println("HTTP/1.0 404 FILE NOT FOUND");
               } else {
-                out.write("HTTP/1.0 403 FORBIDDEN");
+                out.println("HTTP/1.0 401 UNAUTHORIZED");
               }
               out.flush();
 
             } catch (Exception e) {
               System.out.println(e);
+              out.println("HTTP/1.0 500 INTERNAL SERVER ERROR");
+              out.println("");
             }
-
             // Send the rest of the headers
             out.println("");
-
           }
-
-
-
-
-
-        }else{
-          out.println("HTTP/1.0 400");
+        } else {
+          out.println("HTTP/1.0 400 BAD REQUEST");
           out.println("");
         }
 
         out.flush();
         remote.close();
       } catch (Exception e) {
+        out.println("HTTP/1.0 500 INTERNAL SERVER ERROR");
+        out.println("");
         System.out.println("Error: " + e);
       }
     }
   }
 
-
   /**
-   * Start the application.
-   * 
-   * @param args
-   *            Command line parameters are not used.
+   * add the Content-Type line on the header
+   * @param url the url or the path of the file
+   * @param out the Print writer where we send the information
    */
-  public static void main(String args[]) {
-    WebServer ws = new WebServer();
-    ws.start();
+  public void addContentType(String url,PrintWriter out){
+      if (url.contains(".html")) {
+        out.println("Content-Type: text/html");
+      } else if (url.contains(".jpg") || url.contains(".jpeg") || url.contains(".png") || url.contains(".gif")) {
+        out.println("Content-Type: image/" + url.substring(url.lastIndexOf(".") + 1));
+      } else if (url.contains(".pdf")) {
+        out.println("Content-Type: application/pdf");
+      } else if (url.contains(".wav")) {
+        out.println("Content-Type: audio/wav");
+      } else if (url.contains(".mp3")) {
+        out.println("Content-Type: audio/mpeg");
+      } else if (url.contains(".mp4") || url.contains(".mpeg")) {
+        out.println("Content-Type: video/" + url.substring(url.lastIndexOf(".") + 1));
+      }
   }
+
 }
