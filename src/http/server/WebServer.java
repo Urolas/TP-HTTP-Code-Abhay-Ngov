@@ -81,8 +81,11 @@ public class WebServer {
           if (!file.exists()) {
             out.println("HTTP/1.0 404 FILE NOT FOUND");
             out.println("");
+          } else if (url.contains(".txt")){
+            out.println("HTTP/1.0 403 FORBIDDEN");
+            out.println("");
           } else {
-            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(remote.getOutputStream());
+            BufferedOutputStream buffOutputStream = new BufferedOutputStream(remote.getOutputStream());
             out.println("HTTP/1.0 200 OK");
             out.println("Server: Bot");
             //we ignore the icon request
@@ -94,17 +97,17 @@ public class WebServer {
             out.println("");
             out.flush();
             // Send the HTML page
-            Files.copy(file.toPath(), bufferedOutputStream);
-            bufferedOutputStream.close();
+            Files.copy(file.toPath(), buffOutputStream);
+            buffOutputStream.close();
           }
 
           //------------------------------------------REQUEST POST---------------------------------------------
         } else if (request.startsWith("POST ")) { // Status 200 = ok ; Status 201 = Created
-
+          String url = request.split(" ", 3)[1].substring(1);
           char[] data = new char[lengthContent];
           in.read(data,0,lengthContent);
           System.out.println(data);
-          File dataFile = new File("data.txt");
+          File dataFile = new File(url);
           BufferedWriter writer = new BufferedWriter(new FileWriter(dataFile, true));
           writer.append(String.valueOf(data)+"\n");
 
@@ -136,12 +139,12 @@ public class WebServer {
           }
           //------------------------------------------REQUEST PUT---------------------------------------------
         } else if (request.startsWith("PUT ")) { //200 Status ok or 204 Status No content , 201 Created
+          String url = request.split(" ", 3)[1].substring(1);
 
           char[] data = new char[lengthContent];
           in.read(data,0,lengthContent);
           System.out.println(data);
-          String path = "dataPUT.txt";
-          File dataFile = new File(path);
+          File dataFile = new File(url);
 
           try{
 
