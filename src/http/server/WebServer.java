@@ -147,7 +147,6 @@ public class WebServer {
           File dataFile = new File(url);
 
           try{
-
             if(dataFile.exists()) {
               //clear the old file
               FileWriter fw = new FileWriter(dataFile, false);
@@ -159,9 +158,7 @@ public class WebServer {
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(dataFile, true));
             writer.append(String.valueOf(data) + "\n");
-
             writer.close();
-
             if(dataFile.exists()){
               out.println("HTTP/1.0 200 OK");
             }else{
