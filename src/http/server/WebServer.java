@@ -178,7 +178,6 @@ public class WebServer {
             out.println("");
           }
 
-
           //------------------------------------------REQUEST DELETE---------------------------------------------
         } else if (request.startsWith("DELETE ")) { //200(OK) includes message body or 204(NO CONTENT) completed but no body
 
@@ -188,33 +187,24 @@ public class WebServer {
           if (!url.equals("favicon.ico")) {
             out.println();
             // Send the response
-
             try {
               File fileToDelete = new File(String.valueOf(fileName));
-
               // Delete file
               boolean deleteSuccess = false;
               boolean fileExist = false;
-              //String fileTxt = Files.readString(fileName);
-
               if ((fileExist = fileToDelete.exists())) {
                 deleteSuccess = fileToDelete.delete();
               }
-
               // Send the headers
               if (deleteSuccess) {
                 out.println("HTTP/1.0 204 NO CONTENT"); // didn't read the file, I just deleted it
                 addContentType(url, out);
                 out.println("Server: Bot");
                 out.println("");
-                //out.println(fileTxt);
-
               } else if (!fileExist) {
-
                 out.println("HTTP/1.0 404 FILE NOT FOUND");
               } else {
                 out.println("HTTP/1.0 401 UNAUTHORIZED");
-
               }
 
             } catch (Exception e) {
@@ -261,5 +251,4 @@ public class WebServer {
         out.println("Content-Type: video/" + url.substring(url.lastIndexOf(".") + 1));
       }
   }
-
 }
