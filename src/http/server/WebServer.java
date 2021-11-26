@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Launch a web server
@@ -107,16 +108,17 @@ public class WebServer {
           char[] data = new char[lengthContent];
           in.read(data,0,lengthContent);
           System.out.println(data);
+          if(Files.exists(Paths.get(url))){
+            out.println("HTTP/1.0 200 OK");
+          }else{
+            out.println("HTTP/1.0 201 FILE CREATED");
+          }
           File dataFile = new File(url);
           BufferedWriter writer = new BufferedWriter(new FileWriter(dataFile, true));
           writer.append(String.valueOf(data)+"\n");
 
           writer.close();
-          if(dataFile.exists()){
-            out.println("HTTP/1.0 200 OK");
-          }else{
-            out.println("HTTP/1.0 201 FILE CREATED");
-          }
+
           out.println("Server: Bot");
           out.println("Content-Type: text/html");
           out.println("");
@@ -144,6 +146,11 @@ public class WebServer {
           char[] data = new char[lengthContent];
           in.read(data,0,lengthContent);
           System.out.println(data);
+          if(Files.exists(Paths.get(url))){
+            out.println("HTTP/1.0 200 OK");
+          }else{
+            out.println("HTTP/1.0 201 FILE CREATED");
+          }
           File dataFile = new File(url);
 
           try{
@@ -159,15 +166,9 @@ public class WebServer {
             BufferedWriter writer = new BufferedWriter(new FileWriter(dataFile, true));
             writer.append(String.valueOf(data) + "\n");
             writer.close();
-            if(dataFile.exists()){
-              out.println("HTTP/1.0 200 OK");
-            }else{
-              out.println("HTTP/1.0 201 FILE CREATED");
-            }
             out.println("Server: Bot");
             out.println("Content-Type: text/html");
             out.println("");
-            out.println("<H3>Suscribed !</H3>");
 
           }catch(Exception exception){
             System.out.println(exception);
